@@ -60,4 +60,5 @@ The workflow focuses on reducing the effort required to understand a user's day 
 
 ## Note
 
-This repository contains the exported n8n workflow. Credentials and sensitive configuration should be configured separately inside n8n.
+This repository contains the exported n8n workflow. Credentials and sensitive configuration should be configured separately inside n8n according to individual preference and life choices.
+
