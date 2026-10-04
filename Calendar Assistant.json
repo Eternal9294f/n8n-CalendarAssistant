@@ -1,0 +1,179 @@
+{
+  "name": "Calender Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "8088dc1a-b11b-473b-810f-d5dd3809f91e",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Today is {{ $now.toFormat(\"cccc, d LLLL yyyy\") }} (timezone: {{ $now.zoneName }}).\n\nReview my Google Calendar events from now through the next 24 hours and send me one concise, brutally honest summary of my day.\n\nDo not list every event equally. Focus on what actually matters:\n\n- **Must Not Miss:** Critical, urgent, or high-consequence events.\n- **Important:** Events requiring preparation, travel, follow-up, or decisions.\n- **Can Ignore:** Routine, vague, duplicate, cancelled, or low-value events.\n- **Conflicts:** Overlapping events and which one deserves priority.\n- **Wasted Time:** Unnecessary commitments, poor scheduling, or avoidable gaps.\n- **Action Plan:** The exact next steps I should take.\n\nWrite the email directly to me using **“you”** and **“your.”** Be sharp, direct, and constructive. Call out distractions and unrealistic scheduling, but do not insult me. End with the single most important thing I need to do next.",
+        "options": {
+          "systemMessage": "You are a helpful daily-briefing assistant. Always use the calendar tool to get the events for the next 24 hours, then call the email tool exactly once. The email should list each event chronologically with its start-end time, title, location or meeting link if present. If there are no events, say the day is clear. Keep it short and friendly."
+        }
+      },
+      "id": "a0a7d4c8-da4d-43ba-a0f1-52d3dc5d1341",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "id": "fd9aad36-e069-422b-8084-6e473f3a793e",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        208
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "zvkMziCnW2L75lUm",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "adityanaagar8@gmail.com",
+          "mode": "list",
+          "cachedResultName": "adityanaagar8@gmail.com"
+        },
+        "timeMax": "={{ $now.plus({ day: 1 }) }}",
+        "options": {}
+      },
+      "id": "40eb953a-7de3-43d4-b2b1-e5d6d549af4c",
+      "name": "Get many events in Google Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        304
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "0a96bTqFJ05vN1SX",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "adityanaagar8@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('subject', 'Email subject line, e.g. Your schedule for today') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', \"Plain-text email body summarizing the day's calendar events\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "afaead84-02e7-4e9b-b6d5-02ce378e24aa",
+      "name": "Send a message in Gmail",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        192
+      ],
+      "webhookId": "a0a39dd4-2f84-4334-aabc-c09b00458f6d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cJcmRkk3QTyiKABd",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "31e1be5a-d47c-44bb-ac24-663da064e702",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f23e7a2664b7440148a2fdaf65812d34bdd58c30e82627098df39b3ef87613ae"
+  },
+  "nodeGroups": [],
+  "id": "soIY5ESUhXuusVri",
+  "tags": []
+}
